@@ -2,18 +2,27 @@ group 'com.nail'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.1.4-3'
+    ext.kotlin_version = '1.2.21'
+    ext.quasar_version = '0.7.7'
+    ext.quasar_jdk_version=':jdk8'
+    ext.springboot_version = '1.5.10.RELEASE'
 
     repositories {
         mavenCentral()
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springboot_version}")
     }
 }
 
+apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'kotlin'
+apply plugin: 'application'
+apply plugin: 'org.springframework.boot'
+
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 sourceCompatibility = 1.8
 
@@ -21,9 +30,19 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    quasar
+}
+
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    compile "co.paralleluniverse:quasar-core:$quasar_version$quasar_jdk_version"
+    compile "co.paralleluniverse:quasar-actors:$quasar_version"
+    compile 'org.springframework.boot:spring-boot-starter'
+
+    quasar "co.paralleluniverse:quasar-core:$quasar_version$quasar_jdk_version@jar"
+
+    testCompile group: 'junit', name: 'junit', version: '3.12'
 }
 
 compileKotlin {
@@ -31,4 +50,12 @@ compileKotlin {
 }
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+mainClassName = "com.test.App"
+
+if (project.hasProperty('method')) {
+    apply from: "${project.hasProperty('method')}.gradle"
+} else {
+    apply from: "agent.gradle"
 }
