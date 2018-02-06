@@ -4,7 +4,7 @@ version '1.0-SNAPSHOT'
 buildscript {
     ext.kotlin_version = '1.2.21'
     ext.quasar_version = '0.7.7'
-    ext.quasar_jdk_version=':jdk8'
+    ext.quasar_jdk_version = ':jdk8'
     ext.springboot_version = '1.5.10.RELEASE'
 
     repositories {
@@ -42,7 +42,7 @@ dependencies {
 
     quasar "co.paralleluniverse:quasar-core:$quasar_version$quasar_jdk_version@jar"
 
-    testCompile group: 'junit', name: 'junit', version: '3.12'
+//     testCompile group: 'junit', name: 'junit', version: '3.12'
 }
 
 compileKotlin {
@@ -52,7 +52,7 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-mainClassName = "com.test.App"
+mainClassName = "com.nail.App"
 
 if (project.hasProperty('method')) {
     apply from: "${project.hasProperty('method')}.gradle"
