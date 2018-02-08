@@ -13,17 +13,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class NailContext {
     private static final Logger logger = LoggerFactory.getLogger(NailContext.class);
 
+    private NailConfig config;
+
     private FiberScheduler fiberScheduler;
 
     private AtomicBoolean inited = new AtomicBoolean(false);
 
-    public void init(String name, int parallelism) {
+    public void init(NailConfig config) {
         if (!inited.compareAndSet(false, true)) {
             logger.warn("already inited, do nothing ...");
             return;
         }
 
-        fiberScheduler = new FiberForkJoinScheduler(name, parallelism, null, false);
+        this.config = config;
+
+        fiberScheduler = new FiberForkJoinScheduler(config.getName() + "-pool", config.getParrallelism(), null, false);
     }
 
     public FiberScheduler getFiberScheduler() {
