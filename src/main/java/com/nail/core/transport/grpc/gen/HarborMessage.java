@@ -18,6 +18,7 @@ private static final long serialVersionUID = 0L;
   private HarborMessage() {
     name_ = "";
     value_ = "";
+    k_ = "";
   }
 
   @java.lang.Override
@@ -61,6 +62,12 @@ private static final long serialVersionUID = 0L;
             java.lang.String s = input.readStringRequireUtf8();
 
             value_ = s;
+            break;
+          }
+          case 26: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            k_ = s;
             break;
           }
         }
@@ -155,6 +162,40 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int K_FIELD_NUMBER = 3;
+  private volatile java.lang.Object k_;
+  /**
+   * <code>string k = 3;</code>
+   */
+  public java.lang.String getK() {
+    java.lang.Object ref = k_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      k_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string k = 3;</code>
+   */
+  public com.google.protobuf.ByteString
+      getKBytes() {
+    java.lang.Object ref = k_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      k_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   public final boolean isInitialized() {
     byte isInitialized = memoizedIsInitialized;
@@ -173,6 +214,9 @@ private static final long serialVersionUID = 0L;
     if (!getValueBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 2, value_);
     }
+    if (!getKBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, k_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -186,6 +230,9 @@ private static final long serialVersionUID = 0L;
     }
     if (!getValueBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, value_);
+    }
+    if (!getKBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, k_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -207,6 +254,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getName());
     result = result && getValue()
         .equals(other.getValue());
+    result = result && getK()
+        .equals(other.getK());
     result = result && unknownFields.equals(other.unknownFields);
     return result;
   }
@@ -222,6 +271,8 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getName().hashCode();
     hash = (37 * hash) + VALUE_FIELD_NUMBER;
     hash = (53 * hash) + getValue().hashCode();
+    hash = (37 * hash) + K_FIELD_NUMBER;
+    hash = (53 * hash) + getK().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -355,6 +406,8 @@ private static final long serialVersionUID = 0L;
 
       value_ = "";
 
+      k_ = "";
+
       return this;
     }
 
@@ -379,6 +432,7 @@ private static final long serialVersionUID = 0L;
       com.nail.core.transport.grpc.gen.HarborMessage result = new com.nail.core.transport.grpc.gen.HarborMessage(this);
       result.name_ = name_;
       result.value_ = value_;
+      result.k_ = k_;
       onBuilt();
       return result;
     }
@@ -426,6 +480,10 @@ private static final long serialVersionUID = 0L;
       }
       if (!other.getValue().isEmpty()) {
         value_ = other.value_;
+        onChanged();
+      }
+      if (!other.getK().isEmpty()) {
+        k_ = other.k_;
         onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
@@ -589,6 +647,75 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       value_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object k_ = "";
+    /**
+     * <code>string k = 3;</code>
+     */
+    public java.lang.String getK() {
+      java.lang.Object ref = k_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        k_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string k = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getKBytes() {
+      java.lang.Object ref = k_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        k_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string k = 3;</code>
+     */
+    public Builder setK(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      k_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string k = 3;</code>
+     */
+    public Builder clearK() {
+      
+      k_ = getDefaultInstance().getK();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string k = 3;</code>
+     */
+    public Builder setKBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      k_ = value;
       onChanged();
       return this;
     }

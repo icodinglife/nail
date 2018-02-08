@@ -26,4 +26,14 @@ public interface HarborMessageOrBuilder extends
    */
   com.google.protobuf.ByteString
       getValueBytes();
+
+  /**
+   * <code>string k = 3;</code>
+   */
+  java.lang.String getK();
+  /**
+   * <code>string k = 3;</code>
+   */
+  com.google.protobuf.ByteString
+      getKBytes();
 }

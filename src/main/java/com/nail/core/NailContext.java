@@ -13,6 +13,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class NailContext {
     private static final Logger logger = LoggerFactory.getLogger(NailContext.class);
 
+    public static final String ZKROOT = "/nail";
+    public static final String ZKNODES = ZKROOT + "/nodes";
+    public static final String ZKSERVICES = ZKROOT + "/services";
+
     private NailConfig config;
 
     private FiberScheduler fiberScheduler;

@@ -7,4 +7,5 @@ option java_outer_classname = "Harbor";
 message HarborMessage {
     string name = 1;
     string value = 2;
+    string k = 3;
 }

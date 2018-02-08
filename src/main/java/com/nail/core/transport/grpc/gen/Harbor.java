@@ -28,9 +28,10 @@ public final class Harbor {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014harbor.proto\",\n\rHarborMessage\022\014\n\004name\030" +
-      "\001 \001(\t\022\r\n\005value\030\002 \001(\tB,\n com.nail.core.tr" +
-      "ansport.grpc.genB\006HarborP\001b\006proto3"
+      "\n\014harbor.proto\"7\n\rHarborMessage\022\014\n\004name\030" +
+      "\001 \001(\t\022\r\n\005value\030\002 \001(\t\022\t\n\001k\030\003 \001(\tB,\n com.n" +
+      "ail.core.transport.grpc.genB\006HarborP\001b\006p" +
+      "roto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -49,7 +50,7 @@ public final class Harbor {
     internal_static_HarborMessage_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_HarborMessage_descriptor,
-        new java.lang.String[] { "Name", "Value", });
+        new java.lang.String[] { "Name", "Value", "K", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

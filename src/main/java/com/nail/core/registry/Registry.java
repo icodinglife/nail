@@ -8,7 +8,7 @@ import java.util.List;
 public interface Registry extends Closeable {
     void init(List<HostAndPort> hosts);
 
-    void register(String zone, String group, String server, String service, HostAndPort host, String extraData);
+    boolean register(String namespace, String zone, String group, String server, String service, HostAndPort host, RegistryData registryData);
 
-    void unregister(String zone, String group, String server, String service, HostAndPort host);
+    boolean unregister(String namespace, String zone, String group, String server, String service, HostAndPort host);
 }

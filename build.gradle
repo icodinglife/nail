@@ -12,6 +12,7 @@ buildscript {
     ext.commons_lang3_version = '3.7'
     ext.fastjson_version = '1.2.46'
     ext.kryo_version = '4.0.1'
+    ext.zk_curator_version = '4.0.0'
 
     repositories {
         mavenCentral()
@@ -19,7 +20,7 @@ buildscript {
     dependencies {
 //        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springboot_version}")
-        classpath ("com.google.protobuf:protobuf-gradle-plugin:${protobuf_plugin_version}")
+        classpath("com.google.protobuf:protobuf-gradle-plugin:${protobuf_plugin_version}")
     }
 }
 
@@ -69,6 +70,9 @@ dependencies {
     compile "io.grpc:grpc-netty:${grpc_version}"
     compile "io.grpc:grpc-protobuf:${grpc_version}"
     compile "io.grpc:grpc-stub:${grpc_version}"
+
+    // zk client curator
+    compile "org.apache.curator:curator-recipes:${zk_curator_version}"
 }
 
 //compileKotlin {
@@ -99,11 +103,11 @@ protobuf {
         }
     }
     generateProtoTasks.generatedFilesBaseDir = 'src'
-    generateProtoTasks {
-        all()*.plugins {
-            grpc {}
-        }
-    }
+//    generateProtoTasks {
+//        all()*.plugins {
+//            grpc {}
+//        }
+//    }
 }
 
 mainClassName = "com.nail.App"
