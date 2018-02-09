@@ -10,7 +10,6 @@ import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache;
-import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,43 +54,35 @@ public class ZKDiscovery implements Discovery {
     public void addListener(String path, DiscoveryListener listener) {
         Objects.requireNonNull(listener, "listener cannot be null");
         Objects.requireNonNull(curatorFramework, "not call init");
+        if (pathChildrenCacheMap.containsKey(path)) {
+            logger.warn(path + " zk listener already exist.");
+            return;
+        }
 
         PathChildrenCache pathChildrenCache = new PathChildrenCache(curatorFramework, path, true);
 
         pathChildrenCache.getListenable().addListener((curatorFramework, event) -> {
             Debug.debug(() -> logger.info("Rrecv ZK event: " + JSON.toJSONString(event)));
 
-            listener.onChange(path, event.getData().getData(), switchType(event.getType()));
+            byte[] data = null;
+            if (event.getData() != null) {
+                data = event.getData().getData();
+            }
+
+            listener.onChange(path, data, DiscoveryListener.switchType(event.getType()));
         });
 
         try {
-            pathChildrenCache.start(PathChildrenCache.StartMode.POST_INITIALIZED_EVENT);
-            pathChildrenCacheMap.put(path, pathChildrenCache);
+            if (pathChildrenCacheMap.putIfAbsent(path, pathChildrenCache) == null) {
+                pathChildrenCache.start(PathChildrenCache.StartMode.POST_INITIALIZED_EVENT);
+            } else {
+                pathChildrenCache.close();
+            }
         } catch (Exception e) {
             logger.error("ZK AddListener Error...", e);
         }
     }
 
-    public DiscoveryListener.EvtType switchType(PathChildrenCacheEvent.Type type) {
-        switch (type) {
-            case CHILD_ADDED:
-                return DiscoveryListener.EvtType.CHILD_ADDED;
-            case CHILD_UPDATED:
-                return DiscoveryListener.EvtType.CHILD_UPDATED;
-            case CHILD_REMOVED:
-                return DiscoveryListener.EvtType.CHILD_REMOVED;
-            case CONNECTION_SUSPENDED:
-                return DiscoveryListener.EvtType.CONNECTION_SUSPENDED;
-            case CONNECTION_RECONNECTED:
-                return DiscoveryListener.EvtType.CONNECTION_RECONNECTED;
-            case CONNECTION_LOST:
-                return DiscoveryListener.EvtType.CONNECTION_LOST;
-            case INITIALIZED:
-                return DiscoveryListener.EvtType.INITIALIZED;
-            default:
-                return DiscoveryListener.EvtType.UNKNOWN;
-        }
-    }
 
     @Override
     public void close() throws IOException {

@@ -1,6 +1,8 @@
 package com.nail.core.registry;
 
 import org.apache.curator.framework.recipes.cache.PathChildrenCache;
+import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent;
+import org.apache.curator.framework.recipes.cache.TreeCacheEvent;
 import org.apache.curator.framework.state.ConnectionState;
 
 /**
@@ -8,6 +10,21 @@ import org.apache.curator.framework.state.ConnectionState;
  */
 public interface DiscoveryListener {
     enum EvtType {
+        /**
+         * A node was added.
+         */
+        NODE_ADDED,
+
+        /**
+         * A node's data was changed
+         */
+        NODE_UPDATED,
+
+        /**
+         * A node was removed from the tree
+         */
+        NODE_REMOVED,
+
         /**
          * A child was added to the path
          */
@@ -61,6 +78,48 @@ public interface DiscoveryListener {
         INITIALIZED,
 
         UNKNOWN
+    }
+
+    static DiscoveryListener.EvtType switchType(PathChildrenCacheEvent.Type type) {
+        switch (type) {
+            case CHILD_ADDED:
+                return DiscoveryListener.EvtType.CHILD_ADDED;
+            case CHILD_UPDATED:
+                return DiscoveryListener.EvtType.CHILD_UPDATED;
+            case CHILD_REMOVED:
+                return DiscoveryListener.EvtType.CHILD_REMOVED;
+            case CONNECTION_SUSPENDED:
+                return DiscoveryListener.EvtType.CONNECTION_SUSPENDED;
+            case CONNECTION_RECONNECTED:
+                return DiscoveryListener.EvtType.CONNECTION_RECONNECTED;
+            case CONNECTION_LOST:
+                return DiscoveryListener.EvtType.CONNECTION_LOST;
+            case INITIALIZED:
+                return DiscoveryListener.EvtType.INITIALIZED;
+            default:
+                return DiscoveryListener.EvtType.UNKNOWN;
+        }
+    }
+
+    static DiscoveryListener.EvtType switchType(TreeCacheEvent.Type type) {
+        switch (type) {
+            case NODE_ADDED:
+                return DiscoveryListener.EvtType.NODE_ADDED;
+            case NODE_UPDATED:
+                return DiscoveryListener.EvtType.NODE_UPDATED;
+            case NODE_REMOVED:
+                return DiscoveryListener.EvtType.NODE_REMOVED;
+            case CONNECTION_SUSPENDED:
+                return DiscoveryListener.EvtType.CONNECTION_SUSPENDED;
+            case CONNECTION_RECONNECTED:
+                return DiscoveryListener.EvtType.CONNECTION_RECONNECTED;
+            case CONNECTION_LOST:
+                return DiscoveryListener.EvtType.CONNECTION_LOST;
+            case INITIALIZED:
+                return DiscoveryListener.EvtType.INITIALIZED;
+            default:
+                return DiscoveryListener.EvtType.UNKNOWN;
+        }
     }
 
     void onChange(String path, byte[] data, EvtType evtType);

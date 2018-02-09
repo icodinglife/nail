@@ -11,4 +11,6 @@ public interface Registry extends Closeable {
     boolean register(String namespace, String zone, String group, String server, String service, HostAndPort host, RegistryData registryData);
 
     boolean unregister(String namespace, String zone, String group, String server, String service, HostAndPort host);
+
+    void addTreeListener(String path, DiscoveryListener listener);
 }
