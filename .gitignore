@@ -16,4 +16,5 @@ gradle-app.setting
 /nail.iml
 /*.ipr
 /*.iws
+/*.iml
 /out
