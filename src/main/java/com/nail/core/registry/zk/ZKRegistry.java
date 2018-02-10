@@ -5,13 +5,13 @@ import com.google.common.net.HostAndPort;
 import com.nail.core.registry.DiscoveryListener;
 import com.nail.core.registry.Helper;
 import com.nail.core.registry.Registry;
-import com.nail.core.registry.RegistryData;
 import com.nail.debug.Debug;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
-import org.apache.curator.framework.recipes.cache.*;
+import org.apache.curator.framework.recipes.cache.PathChildrenCache;
+import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.zookeeper.CreateMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,11 +56,11 @@ public class ZKRegistry implements Registry {
     }
 
     @Override
-    public boolean register(String namespace, String zone, String group, String server, String service, HostAndPort host, RegistryData registryData) {
+    public boolean register(String namespace, String zone, String group, String server, String service, HostAndPort host, byte[] registryData) {
         Objects.requireNonNull(curatorFramework, "call init first...");
 
         String path = Helper.joinPath(namespace, zone, group, server, service);
-        byte[] data = JSON.toJSONString(registryData).getBytes();
+        byte[] data = registryData;
 
         return register(path, data);
     }
