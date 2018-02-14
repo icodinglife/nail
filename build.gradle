@@ -88,7 +88,7 @@ sourceSets {
             srcDir 'src/main/java/com/nail/core/transport/proto'
         }
         java {
-            srcDirs 'src/main/java'
+            srcDirs 'src/main/java', 'src/main/grpc'
         }
     }
 }
@@ -103,11 +103,11 @@ protobuf {
         }
     }
     generateProtoTasks.generatedFilesBaseDir = 'src'
-//    generateProtoTasks {
-//        all()*.plugins {
-//            grpc {}
-//        }
-//    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
 }
 
 mainClassName = "com.nail.App"

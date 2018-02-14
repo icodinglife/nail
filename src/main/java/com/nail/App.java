@@ -4,21 +4,22 @@ import co.paralleluniverse.actors.BasicActor;
 import co.paralleluniverse.actors.behaviors.ProxyServerActor;
 import co.paralleluniverse.actors.behaviors.Server;
 import co.paralleluniverse.fibers.*;
-import co.paralleluniverse.strands.SuspendableCallable;
-import co.paralleluniverse.strands.SuspendableRunnable;
-import co.paralleluniverse.strands.channels.Channels;
-import co.paralleluniverse.strands.channels.IntChannel;
+import com.alibaba.fastjson.JSON;
+import com.google.common.net.HostAndPort;
+import com.nail.core.NailConfig;
+import com.nail.core.NailContext;
+import com.nail.core.registry.Registry;
+import com.nail.core.registry.Service;
+import com.nail.core.registry.ServiceDiscovery;
+import com.nail.core.registry.zk.ZKRegistry;
 import com.nail.utils.NailComponent;
 import com.nail.utils.SpringBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -180,26 +181,45 @@ public class App {
 
     static public void main(String[] args) throws ExecutionException, InterruptedException {
 //        doAll();
-//        testProxyServer();
-        appCtx = SpringApplication.run(App.class, args);
-        AT callTest = appCtx.getBean(AT.class);
-        System.out.println(callTest.call("calltest"));
+       testProxyServer();
+//         appCtx = SpringApplication.run(App.class, args);
+//         testAll();
+//
+//         try {
+//             System.in.read();
+//         } catch (IOException e) {
+//             e.printStackTrace();
+//         }
+    }
 
+    private static void testAll() {
+        String zone = "";
+        String nodeName = "test";
+        String host = "127.0.0.1";
+        int port = 16666;
+        NailConfig config = new NailConfig(zone, nodeName, host, port, 2);
+        NailContext ctx = new NailContext();
+        ctx.init(config);
 
-        long start = System.currentTimeMillis();
-        List<Object> objs = new ArrayList<>();
-        final int COUNT = 1000000;
-        for (int i = 0; i < COUNT; i++) {
-            CallTest ct = new CallTest();
-            ProxyServerActor psActor = new ProxyServerActor("test actor", false, ct);
-            Server<?, ?, ?> server = psActor.spawn();
-            AT at = (AT) server;
-            objs.add(at.call("test"));
-            objs.add(ct);
-            objs.add(at);
-        }
-        long end = System.currentTimeMillis();
+        Registry registry = new ZKRegistry();
+        List<HostAndPort> zkHosts = new ArrayList<>();
+        zkHosts.add(HostAndPort.fromParts("127.0.0.1", 2181));
+        registry.init(zkHosts);
 
-        System.out.println("Total: " + (end - start) + ", AVG: " + (end - start) / (double)COUNT);
+        ServiceDiscovery serviceDiscovery = new ServiceDiscovery();
+        serviceDiscovery.init(registry, zone, nodeName, host, port);
+
+        Service service = new Service("TestService", "TestService1", nodeName);
+        serviceDiscovery.registerService(zone, service);
+
+        new Thread(() -> {
+            try {
+                Thread.sleep(5 * 1000L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(JSON.toJSONString(serviceDiscovery.getNode(nodeName)));
+            System.out.println(JSON.toJSONString(serviceDiscovery.getService("TestService", "TestService1")));
+        }).start();
     }
 }

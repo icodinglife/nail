@@ -27,4 +27,12 @@ public class ServiceGroup {
     public void removeService(String serviceName) {
         serviceMap.remove(serviceName);
     }
+
+    public Service getService(String serviceName) {
+        return serviceMap.get(serviceName);
+    }
+
+    public Map<String, Service> getServiceMap() {
+        return serviceMap;
+    }
 }

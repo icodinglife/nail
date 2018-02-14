@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.nail.core.transport.grpc.gen";
+option java_outer_classname = "TransService";
+//option java_generic_services = true;
+
+message TransMessage {
+    int32 type = 1;
+    bytes content = 2;
+}
+
+message TransMessageResult {
+
+}
+
+message TransPingRequest {
+}
+message TransPingResponse {
+}
+
+service Trans {
+    rpc ping (TransPingRequest) returns (TransPingResponse);
+    rpc postMessage (TransMessage) returns (TransMessageResult);
+}

@@ -56,7 +56,7 @@ public class ZKRegistry implements Registry {
     }
 
     @Override
-    public boolean register(String namespace, String zone, String group, String server, String service, HostAndPort host, byte[] registryData) {
+    public boolean register(String namespace, String zone, String group, String server, String service, byte[] registryData) {
         Objects.requireNonNull(curatorFramework, "call init first...");
 
         String path = Helper.joinPath(namespace, zone, group, server, service);
@@ -80,7 +80,7 @@ public class ZKRegistry implements Registry {
                 private boolean initd = false;
 
                 @Override
-                public void onChange(String path, byte[] data, EvtType evtType) {
+                public void onChange(String path, byte[] dt, EvtType evtType) {
                     switch (evtType) {
                         case INITIALIZED:
                             initd = true;
@@ -133,7 +133,7 @@ public class ZKRegistry implements Registry {
 
 
     @Override
-    public boolean unregister(String namespace, String zone, String group, String server, String service, HostAndPort host) {
+    public boolean unregister(String namespace, String zone, String group, String server, String service) {
         String path = Helper.joinPath(namespace, zone, group, server, service);
 
         PathChildrenCache pathChildrenCache = pathChildrenCacheMap.remove(path);
@@ -166,12 +166,14 @@ public class ZKRegistry implements Registry {
 
         TreeCache treeCache = new TreeCache(curatorFramework, path);
         treeCache.getListenable().addListener((client, event) -> {
+            String ppath = path;
             byte[] data = null;
             if (event.getData() != null) {
                 data = event.getData().getData();
+                ppath = event.getData().getPath();
             }
 
-            listener.onChange(path, data, DiscoveryListener.switchType(event.getType()));
+            listener.onChange(ppath, data, DiscoveryListener.switchType(event.getType()));
         });
         try {
             if (treeCacheMap.putIfAbsent(path, treeCache) == null) {

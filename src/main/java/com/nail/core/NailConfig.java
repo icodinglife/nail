@@ -1,12 +1,29 @@
 package com.nail.core;
 
 public class NailConfig {
+    private String zone;
     private String name;
     private String host;
     private int port;
     private int parrallelism;
 
     public NailConfig() {
+    }
+
+    public NailConfig(String zone, String name, String host, int port, int parrallelism) {
+        this.zone = zone;
+        this.name = name;
+        this.host = host;
+        this.port = port;
+        this.parrallelism = parrallelism;
+    }
+
+    public String getZone() {
+        return zone;
+    }
+
+    public void setZone(String zone) {
+        this.zone = zone;
     }
 
     public String getName() {

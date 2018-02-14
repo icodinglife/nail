@@ -26,7 +26,7 @@ public class ZKTest {
         registry.init(list);
 
         RegistryData data = new RegistryData("testnode", 10);
-        registry.register("/nail", "wechat", "east", "UserService", "UserService1", null, data);
+        registry.register("/nail", "wechat", "east", "UserService", "UserService1", data.toString().getBytes());
 
         try {
             System.in.read();

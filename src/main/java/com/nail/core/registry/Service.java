@@ -8,6 +8,15 @@ public class Service {
     private String serviceName;
     private String nodeName;
 
+    public Service() {
+    }
+
+    public Service(String groupName, String serviceName, String nodeName) {
+        this.groupName = groupName;
+        this.serviceName = serviceName;
+        this.nodeName = nodeName;
+    }
+
     public String getGroupName() {
         return groupName;
     }

@@ -1,10 +1,13 @@
 package com.nail.core;
 
+import co.paralleluniverse.actors.ActorRef;
 import co.paralleluniverse.fibers.FiberForkJoinScheduler;
 import co.paralleluniverse.fibers.FiberScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -23,6 +26,8 @@ public class NailContext {
 
     private AtomicBoolean inited = new AtomicBoolean(false);
 
+    private Map<String, Map<String, ActorRef<Object>>> actorRefMap;
+
     public void init(NailConfig config) {
         if (!inited.compareAndSet(false, true)) {
             logger.warn("already inited, do nothing ...");
@@ -32,9 +37,34 @@ public class NailContext {
         this.config = config;
 
         fiberScheduler = new FiberForkJoinScheduler(config.getName() + "-pool", config.getParrallelism(), null, false);
+
+        actorRefMap = new ConcurrentHashMap<>();
     }
 
     public FiberScheduler getFiberScheduler() {
         return fiberScheduler;
+    }
+
+    public String getName() {
+        return null;
+    }
+
+    public void addActorRef(String group, String name, ActorRef<Object> ref) {
+        Map<String, ActorRef<Object>> map = actorRefMap.get(group);
+        if (map == null) {
+            map = new ConcurrentHashMap<>();
+            Map<String, ActorRef<Object>> oldMap = actorRefMap.putIfAbsent(group, map);
+            if (oldMap != null) {
+                map = oldMap;
+            }
+        }
+        map.put(name, ref);
+    }
+
+    public void removeActor(String group, String name) {
+        Map<String, ActorRef<Object>> map = actorRefMap.get(group);
+        if (map != null) {
+            map.remove(name);
+        }
     }
 }

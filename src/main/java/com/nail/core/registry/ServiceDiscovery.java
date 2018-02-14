@@ -1,7 +1,6 @@
 package com.nail.core.registry;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.net.HostAndPort;
 import com.nail.core.NailContext;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -41,9 +40,16 @@ public class ServiceDiscovery {
 
     private void registerSelfNode(String zone, String nodeName, String host, int port) {
         Node node = new Node(nodeName, host, port);
-        boolean result = registry.register(NailContext.ZKROOT, NailContext.ZKNODES, zone, nodeName, null, HostAndPort.fromParts(host, port), JSON.toJSONString(node).getBytes());
+        boolean result = registry.register(NailContext.ZKROOT, NailContext.ZKNODES, zone, nodeName, null, JSON.toJSONString(node).getBytes());
         if (!result) {
             throw new RuntimeException("Node Registry Error.");
+        }
+    }
+
+    public void registerService(String zone, Service service) {
+        boolean result = registry.register(NailContext.ZKROOT, NailContext.ZKSERVICES, zone, service.getGroupName(), service.getServiceName(), JSON.toJSONString(service).getBytes());
+        if (!result) {
+            throw new RuntimeException("Service Registry Error.");
         }
     }
 
@@ -87,6 +93,22 @@ public class ServiceDiscovery {
         }
     }
 
+    public Node getNode(String nodeName) {
+        return nodeMap.get(nodeName);
+    }
+
+    public ServiceGroup getServiceGroup(String groupName) {
+        return serviceMap.get(groupName);
+    }
+
+    public Service getService(String groupName, String serviceName) {
+        ServiceGroup group = getServiceGroup(groupName);
+        if (group != null) {
+            return group.getService(serviceName);
+        }
+        return null;
+    }
+
     private static class NodeListener implements DiscoveryListener {
         private ServiceDiscovery serviceDiscovery;
 
@@ -96,20 +118,25 @@ public class ServiceDiscovery {
 
         @Override
         public void onChange(String path, byte[] data, EvtType evtType) {
+            if (data == null || data.length <= 0) {
+                return;
+            }
             String nodeName = null;
             Node node = null;
             if (data != null && data.length > 0) {
-                node = JSON.parseObject(String.valueOf(data), Node.class);
+                node = JSON.parseObject(new String(data), Node.class);
                 nodeName = node.getName();
             } else {
                 nodeName = Helper.parseNodeName(path);
             }
             switch (evtType) {
-                case CHILD_ADDED:
-                case CHILD_UPDATED:
+                case INITIALIZED:
+                    break;
+                case NODE_ADDED:
+                case NODE_UPDATED:
                     serviceDiscovery.addNode(nodeName, node);
                     break;
-                case CHILD_REMOVED:
+                case NODE_REMOVED:
                     serviceDiscovery.removeNode(nodeName);
                     break;
                 default:
@@ -127,11 +154,14 @@ public class ServiceDiscovery {
 
         @Override
         public void onChange(String path, byte[] data, EvtType evtType) {
+            if (data == null || data.length <= 0) {
+                return;
+            }
             String groupName = null;
             String serviceName = null;
             Service service = null;
             if (data != null && data.length > 0) {
-                service = JSON.parseObject(String.valueOf(data), Service.class);
+                service = JSON.parseObject(new String(data), Service.class);
                 groupName = service.getGroupName();
                 serviceName = service.getServiceName();
             } else {
@@ -140,11 +170,13 @@ public class ServiceDiscovery {
                 serviceName = pair.getRight();
             }
             switch (evtType) {
-                case CHILD_ADDED:
-                case CHILD_UPDATED:
+                case INITIALIZED:
+                    break;
+                case NODE_ADDED:
+                case NODE_UPDATED:
                     serviceDiscovery.addService(groupName, serviceName, service);
                     break;
-                case CHILD_REMOVED:
+                case NODE_REMOVED:
                     serviceDiscovery.removeService(groupName, serviceName);
                     break;
                 default:

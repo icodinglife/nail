@@ -8,9 +8,9 @@ import java.util.List;
 public interface Registry extends Closeable {
     void init(List<HostAndPort> hosts);
 
-    boolean register(String namespace, String zone, String group, String server, String service, HostAndPort host, byte[] registryData);
+    boolean register(String namespace, String zone, String group, String server, String service, byte[] registryData);
 
-    boolean unregister(String namespace, String zone, String group, String server, String service, HostAndPort host);
+    boolean unregister(String namespace, String zone, String group, String server, String service);
 
     void addTreeListener(String path, DiscoveryListener listener);
 }
