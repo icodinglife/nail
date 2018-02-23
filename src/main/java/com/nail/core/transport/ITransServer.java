@@ -1,4 +1,6 @@
 package com.nail.core.transport;
 
-public interface ITransServer {
+import java.io.Closeable;
+
+public interface ITransServer extends Closeable {
 }

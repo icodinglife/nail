@@ -1,5 +1,6 @@
 package com.nail.core.transport;
 
+import com.nail.core.NailContext;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +13,11 @@ public class TransManager {
 
     private Map<String, ITransClient> clientMap;
     private ITransClientFactory transClientFactory;
+    private NailContext nailContext;
 
-    public void init(ITransClientFactory factory) {
+    public void init(ITransClientFactory factory, NailContext nailContext) {
         this.transClientFactory = factory;
+        this.nailContext = nailContext;
         clientMap = new ConcurrentHashMap<>();
     }
 
@@ -22,7 +25,7 @@ public class TransManager {
         String key = StringUtils.join(host, port, ':');
         ITransClient client = clientMap.get(key);
         if (client == null) {
-            client = transClientFactory.buildTransClient(host, port);
+            client = transClientFactory.buildTransClient(host, port, nailContext.getClientExecutor());
             ITransClient oldClient = clientMap.putIfAbsent(key, client);
             if (oldClient != null) {
                 client = oldClient;

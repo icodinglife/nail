@@ -3,11 +3,13 @@ package com.nail.core;
 import co.paralleluniverse.actors.ActorRef;
 import co.paralleluniverse.fibers.FiberForkJoinScheduler;
 import co.paralleluniverse.fibers.FiberScheduler;
+import io.netty.channel.nio.NioEventLoopGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -28,6 +30,9 @@ public class NailContext {
 
     private Map<String, Map<String, ActorRef<Object>>> actorRefMap;
 
+    private Executor serverExecutor;
+    private Executor clientExecutor;
+
     public void init(NailConfig config) {
         if (!inited.compareAndSet(false, true)) {
             logger.warn("already inited, do nothing ...");
@@ -39,6 +44,9 @@ public class NailContext {
         fiberScheduler = new FiberForkJoinScheduler(config.getName() + "-pool", config.getParrallelism(), null, false);
 
         actorRefMap = new ConcurrentHashMap<>();
+
+        serverExecutor = new NioEventLoopGroup(1);
+        clientExecutor = new NioEventLoopGroup(2);
     }
 
     public FiberScheduler getFiberScheduler() {
@@ -66,5 +74,13 @@ public class NailContext {
         if (map != null) {
             map.remove(name);
         }
+    }
+
+    public Executor getServerExecutor() {
+        return serverExecutor;
+    }
+
+    public Executor getClientExecutor() {
+        return clientExecutor;
     }
 }

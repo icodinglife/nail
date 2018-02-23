@@ -23,7 +23,6 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class RemoteManager {
@@ -75,34 +74,63 @@ public class RemoteManager {
             futureMap.put(reqId, finished);
         }
 
-        RemoteRequest remoteRequest = new RemoteRequest(reqId, group, service.getServiceName(), method.getName(), args);
+        RemoteRequest remoteRequest = new RemoteRequest(nailContext.getName(), reqId, group, service.getServiceName(), method.getName(), args);
         ITransClient transClient = transManager.getTransClient(node.getHost(), node.getPort());
-        boolean transResult = transClient.trans(RemoteMessage.Type.REQUEST, KryoHelper.writeClassAndObject(remoteRequest));
-        if (!transResult) {
-            futureMap.remove(reqId);
-            finished.completeExceptionally(new RuntimeException("Remote Send Error."));
+        CompletableFuture<Boolean> resFuture = transClient.trans(RemoteMessage.Type.REQUEST, KryoHelper.writeClassAndObject(remoteRequest));
+        resFuture.whenComplete((res, err) -> {
+            if (!res || err != null) {
+                logger.error("Trans Error!", err);
+                futureMap.remove(reqId);
+                finished.completeExceptionally(new RuntimeException("Remote Send Error."));
+            }
+        });
+
+    }
+
+    public void sendResponse(String dest, String id, RemoteResponse.Status status, Object resp, String msg) {
+        RemoteResponse response = new RemoteResponse(id, status, resp, msg);
+
+        Node node = serviceDiscovery.getNode(dest);
+        if (node == null) {
+            logger.error(dest + " Node Not Found.");
+            return;
         }
+        ITransClient transClient = transManager.getTransClient(node.getHost(), node.getPort());
+        CompletableFuture<Boolean> resFuture = transClient.trans(RemoteMessage.Type.RESPONSE, KryoHelper.writeClassAndObject(response));
+        resFuture.whenComplete((res, err) -> {
+            if (!res || err != null) {
+                logger.error("Response Send Error.");
+            }
+        });
     }
 
     private String genReqId() {
         return StringUtils.join(nailContext.getName(), reqIndex.addAndGet(1), '-');
     }
 
-    public void recvRequest(RemoteRequest request) throws ExecutionException, InterruptedException {
+    public void recvRequest(RemoteRequest request) {
         String id = request.getId();
+        String sourceNode = request.getSourceNode();
         String serviceGroup = request.getServiceGroup();
         String serviceName = request.getServiceName();
         String method = request.getMethodName();
         Object[] params = request.getParams();
-        FiberUtil.runInFiber(() -> {
-            ActorRef serviceRef = serviceManager.getService(serviceGroup, serviceName);
-            ProxyServer proxyServer = (ProxyServer) serviceRef;
-            try {
-                Object result = proxyServer.outInvoke(method, params);
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-            }
-        });
+        try {
+            FiberUtil.runInFiber(() -> {
+                try {
+                    ActorRef serviceRef = serviceManager.getService(serviceGroup, serviceName);
+                    ProxyServer proxyServer = (ProxyServer) serviceRef;
+                    Object result = proxyServer.outInvoke(method, params);
+                    sendResponse(sourceNode, id, RemoteResponse.Status.SUCCESS, result, "");
+                } catch (Throwable throwable) {
+                    logger.debug("Proxy Invoke With Exception.", throwable);
+                    sendResponse(sourceNode, id, RemoteResponse.Status.EXCEPTION, throwable, "");
+                }
+            });
+        } catch (Exception e) {
+            logger.error("Unknown Error.", e);
+            sendResponse(sourceNode, id, RemoteResponse.Status.EXCEPTION, e, "");
+        }
     }
 
     public void recvResponse(RemoteResponse response) {
