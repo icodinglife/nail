@@ -8,6 +8,7 @@ import com.nail.core.entity.RemoteResponse;
 import com.nail.core.loadbalance.LoadbalanceManager;
 import com.nail.core.loadbalance.Loadbalancer;
 import com.nail.core.quasar.ProxyServer;
+import com.nail.core.quasar.RemoteProxy;
 import com.nail.core.registry.Node;
 import com.nail.core.registry.Service;
 import com.nail.core.registry.ServiceDiscovery;
@@ -46,6 +47,8 @@ public class RemoteManager {
         this.serviceManager = serviceManager;
 
         futureMap = new ConcurrentHashMap<>();
+
+        RemoteProxy.setRemoteManager(this);
     }
 
     public void sendRequestTo(String group, Method method, Object[] args, CompletableFuture<? super Object> finished) {

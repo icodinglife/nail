@@ -110,7 +110,7 @@ protobuf {
     }
 }
 
-mainClassName = "com.nail.App"
+mainClassName = "com.nail.test.TestApp"
 
 if (project.hasProperty('method')) {
     apply from: "${project.hasProperty('method')}.gradle"

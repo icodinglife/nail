@@ -53,6 +53,10 @@ public class ServiceDiscovery {
         }
     }
 
+    public void unregisterService(String zone, Service service) {
+        registry.unregister(NailContext.ZKROOT, NailContext.ZKSERVICES, zone, service.getGroupName(), service.getServiceName());
+    }
+
     private void addNodesListener() {
         registry.addTreeListener(Helper.joinPath(NailContext.ZKROOT, NailContext.ZKNODES), nodeListener);
     }

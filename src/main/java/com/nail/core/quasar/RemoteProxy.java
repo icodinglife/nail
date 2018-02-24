@@ -1,7 +1,10 @@
 package com.nail.core.quasar;
 
+import co.paralleluniverse.fibers.FiberAsync;
 import co.paralleluniverse.fibers.Suspendable;
 import com.alibaba.fastjson.JSON;
+import com.nail.core.RemoteManager;
+import com.nail.core.Utils;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.implementation.InvocationHandlerAdapter;
@@ -13,6 +16,7 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RemoteProxy {
@@ -20,6 +24,12 @@ public class RemoteProxy {
 
     private static final Map<Class<?>, Class<?>> classes = new ConcurrentHashMap<>();
     private static final RemoteProxyImpl remoteProxyImpl = new RemoteProxyImpl();
+
+    private static RemoteManager remoteManager;
+
+    public static void setRemoteManager(RemoteManager remoteManager) {
+        RemoteProxy.remoteManager = remoteManager;
+    }
 
     public static <T> T make(Class<T> iface) {
         Class<?> clazz = classes.get(iface);
@@ -63,9 +73,36 @@ public class RemoteProxy {
         @Override
         @Suspendable
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            System.out.println(((RemoteProxyTarget) proxy).getTarget().toString() + " " + method.toString() + " Invoked: " + JSON.toJSONString(args));
-            // TODO ... Send The Method Invoke Request To Remote...
-            return null;
+            RemoteProxyTarget target = (RemoteProxyTarget) proxy;
+            Class<?> targetClazz = target.getTarget();
+            String groupName = Utils.getGroupName(targetClazz);
+            QuasarAsyncSender sender = new QuasarAsyncSender(groupName, method, args);
+            return sender.run();
+        }
+    }
+
+    private static class QuasarAsyncSender extends FiberAsync<Object, Exception> {
+        private String group;
+        private Method method;
+        private Object[] args;
+
+        private QuasarAsyncSender(String group, Method method, Object[] args) {
+            this.group = group;
+            this.method = method;
+            this.args = args;
+        }
+
+        @Override
+        protected void requestAsync() {
+            CompletableFuture<Object> future = new CompletableFuture<>();
+            remoteManager.sendRequestTo(group, method, args, future);
+            future.whenComplete((res, err) -> {
+                if (err != null) {
+                    asyncFailed(err);
+                    return;
+                }
+                asyncCompleted(res);
+            });
         }
     }
 

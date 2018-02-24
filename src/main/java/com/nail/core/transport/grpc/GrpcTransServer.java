@@ -1,5 +1,6 @@
 package com.nail.core.transport.grpc;
 
+import com.nail.core.RemoteManager;
 import com.nail.core.transport.ITransServer;
 import io.grpc.Server;
 import io.grpc.netty.NettyServerBuilder;
@@ -11,10 +12,24 @@ import java.io.IOException;
 public class GrpcTransServer implements ITransServer {
     private static final Logger logger = LoggerFactory.getLogger(GrpcTransServer.class);
 
-    private Server server;
+    private RemoteManager remoteManager;
 
+    private Server server;
+    private TransServerImpl serverImpl;
+
+    public GrpcTransServer(RemoteManager remoteManager) {
+        this.remoteManager = remoteManager;
+
+        init();
+    }
+
+    public void init() {
+        serverImpl = new TransServerImpl(remoteManager);
+    }
+
+    @Override
     public boolean start(int port) throws IOException {
-        server = NettyServerBuilder.forPort(port).build();
+        server = NettyServerBuilder.forPort(port).addService(serverImpl).build();
         server.start();
         return true;
     }

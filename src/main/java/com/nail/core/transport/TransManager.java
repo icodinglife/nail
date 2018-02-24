@@ -1,10 +1,12 @@
 package com.nail.core.transport;
 
+import com.nail.core.NailConfig;
 import com.nail.core.NailContext;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -12,13 +14,34 @@ public class TransManager {
     private static final Logger logger = LoggerFactory.getLogger(TransManager.class);
 
     private Map<String, ITransClient> clientMap;
-    private ITransClientFactory transClientFactory;
-    private NailContext nailContext;
 
-    public void init(ITransClientFactory factory, NailContext nailContext) {
+    private NailContext nailContext;
+    private NailConfig nailConfig;
+
+    private ITransServerFactory transServerFactory;
+    private ITransClientFactory transClientFactory;
+
+    private ITransServer transServer;
+
+    public void init(ITransClientFactory factory, ITransServerFactory transServerFactory, NailContext nailContext, NailConfig config) {
         this.transClientFactory = factory;
+        this.transServerFactory = transServerFactory;
         this.nailContext = nailContext;
+        this.nailConfig = config;
+
         clientMap = new ConcurrentHashMap<>();
+
+        startSelfNode();
+    }
+
+    private void startSelfNode() {
+        transServer = transServerFactory.buildTransServer();
+        try {
+            transServer.start(nailConfig.getPort());
+        } catch (IOException e) {
+            logger.error("Server Start Error.", e);
+            throw new RuntimeException("Server Start Error");
+        }
     }
 
     public ITransClient getTransClient(String host, int port) {

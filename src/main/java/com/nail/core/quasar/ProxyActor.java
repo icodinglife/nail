@@ -49,7 +49,7 @@ public class ProxyActor extends ServerActor<ProxyActor.Invocation, Object, Proxy
         this.interfaces = interfaces != null ? Arrays.copyOf(interfaces, interfaces.length) : this.target.getClass().getInterfaces();
         if (this.interfaces == null)
             throw new IllegalArgumentException("No interfaces provided, and target of class " + this.target.getClass().getName() + " implements no interfaces");
-        methodMap = ClassHelper.wrapInterfacesMthods(interfaces);
+        methodMap = ClassHelper.wrapInterfacesMthods(this.interfaces);
     }
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
@@ -257,6 +257,10 @@ public class ProxyActor extends ServerActor<ProxyActor.Invocation, Object, Proxy
     private static final ConcurrentMap<Pair<Set<Class<?>>, Boolean>, Class<? extends Server>> classes = MapUtil.newConcurrentHashMap();
     private static final ProxyActor.ObjectProxyServerImpl handler1 = new ProxyActor.ObjectProxyServerImpl(true);
     private static final ProxyActor.ObjectProxyServerImpl handler2 = new ProxyActor.ObjectProxyServerImpl(false);
+
+    public Class<?> getTargetClass() {
+        return target.getClass();
+    }
 
     private static Class<? extends Server> getProxyClass(Class<?>[] interfaces, boolean callOnVoidMethods) {
         final Pair<Set<Class<?>>, Boolean> key = new Pair(ImmutableSet.copyOf(interfaces), callOnVoidMethods);

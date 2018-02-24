@@ -181,7 +181,7 @@ public class App {
 
     static public void main(String[] args) throws ExecutionException, InterruptedException {
 //        doAll();
-       testProxyServer();
+        testProxyServer();
 //         appCtx = SpringApplication.run(App.class, args);
 //         testAll();
 //
@@ -197,7 +197,7 @@ public class App {
         String nodeName = "test";
         String host = "127.0.0.1";
         int port = 16666;
-        NailConfig config = new NailConfig(zone, nodeName, host, port, 2);
+        NailConfig config = new NailConfig(zone, nodeName, host, port, 2, "127.0.0.1:2181");
         NailContext ctx = new NailContext();
         ctx.init(config);
 
