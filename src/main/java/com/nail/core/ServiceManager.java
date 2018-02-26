@@ -10,6 +10,7 @@ import com.nail.core.registry.ServiceDiscovery;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -53,12 +54,15 @@ public class ServiceManager {
     }
 
     private void checkService(Class<?> target) {
-        Suspendable suspendable = target.getAnnotation(Suspendable.class);
+        if (!Closeable.class.isAssignableFrom(target)) {
+            throw new RuntimeException("Service Interface Must Implement java.io.Closeable.");
+        }
+        Suspendable suspendable = target.getDeclaredAnnotation(Suspendable.class);
         if (suspendable == null) {
             Class<?>[] ifaces = target.getInterfaces();
             if (ifaces != null && ifaces.length > 0) {
                 for (Class<?> iface : ifaces) {
-                    suspendable = iface.getAnnotation(Suspendable.class);
+                    suspendable = iface.getDeclaredAnnotation(Suspendable.class);
                     if (suspendable != null) {
                         return;
                     }
@@ -66,7 +70,7 @@ public class ServiceManager {
             }
         }
         if (suspendable == null) {
-            throw new RuntimeException("Interface Must Add @Suspendable.");
+            throw new RuntimeException("Service Interface Must Add @Suspendable.");
         }
     }
 
