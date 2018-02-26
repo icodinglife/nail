@@ -44,7 +44,7 @@ public class ServiceManager {
 
         checkService(clazz);
 
-        String name = StringUtils.join(clazz.getName(), target.hashCode(), '@');
+        String name = StringUtils.join(new String[]{clazz.getName(), "" + target.hashCode()}, '@');
 
         ProxyActor proxy = new ProxyActor(name, true, target);
         ActorRef ref = proxy.spawn((FiberFactory) nailContext.getFiberScheduler());
