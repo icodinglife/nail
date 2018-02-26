@@ -15,6 +15,7 @@ import com.nail.core.registry.ServiceDiscovery;
 import com.nail.core.registry.ServiceGroup;
 import com.nail.core.transport.ITransClient;
 import com.nail.core.transport.TransManager;
+import com.nail.utils.ClassHelper;
 import com.nail.utils.KryoHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -77,7 +78,7 @@ public class RemoteManager {
             futureMap.put(reqId, finished);
         }
 
-        RemoteRequest remoteRequest = new RemoteRequest(nailContext.getName(), reqId, group, service.getServiceName(), method.getName(), args);
+        RemoteRequest remoteRequest = new RemoteRequest(nailContext.getName(), reqId, group, service.getServiceName(), ClassHelper.wrapMethod(method), args);
         ITransClient transClient = transManager.getTransClient(node.getHost(), node.getPort());
         CompletableFuture<Boolean> resFuture = transClient.trans(RemoteMessage.Type.REQUEST, KryoHelper.writeClassAndObject(remoteRequest));
         resFuture.whenComplete((res, err) -> {

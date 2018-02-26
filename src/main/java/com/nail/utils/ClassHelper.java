@@ -19,23 +19,38 @@ public class ClassHelper {
         return methodMap;
     }
 
+    public static String wrapMethod(Method method) {
+        Class<?>[] params = method.getParameterTypes();
+        List<String> paramsTypeName = new ArrayList<>();
+        if (params != null && params.length > 0) {
+            for (Class<?> param : params) {
+                paramsTypeName.add(param.getSimpleName());
+            }
+        }
+        String methodKey = paramsTypeName.size() > 0 ? StringUtils.join(paramsTypeName, '_') : "";
+        String key = StringUtils.join(new String[]{method.getName(), methodKey}, '.');
+
+        return key;
+    }
+
     private static Map<String, Method> wrapInterfaceMethods(Class<?> iface) {
         Map<String, Method> map = new HashMap<>();
 
-        String ifaceName = iface.getSimpleName();
+//        String ifaceName = iface.getSimpleName();
 
         Method[] methods = iface.getMethods();
         if (methods != null) {
             for (Method mtd : methods) {
-                Class<?>[] params = mtd.getParameterTypes();
-                List<String> paramsTypeName = new ArrayList<>();
-                if (params != null && params.length > 0) {
-                    for (Class<?> param : params) {
-                        paramsTypeName.add(param.getSimpleName());
-                    }
-                }
-                String methodKey = paramsTypeName.size() > 0 ? StringUtils.join(paramsTypeName, '_') : "";
-                String key = StringUtils.join(new String[]{ifaceName, mtd.getName(), methodKey}, '.');
+//                Class<?>[] params = mtd.getParameterTypes();
+//                List<String> paramsTypeName = new ArrayList<>();
+//                if (params != null && params.length > 0) {
+//                    for (Class<?> param : params) {
+//                        paramsTypeName.add(param.getSimpleName());
+//                    }
+//                }
+//                String methodKey = paramsTypeName.size() > 0 ? StringUtils.join(paramsTypeName, '_') : "";
+//                String key = StringUtils.join(new String[]{ifaceName, mtd.getName(), methodKey}, '.');
+                String key = wrapMethod(mtd);
                 map.put(key, mtd);
             }
         }

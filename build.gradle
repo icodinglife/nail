@@ -7,6 +7,8 @@ buildscript {
     ext.quasar_jdk_version = ':jdk8'
     ext.springboot_version = '1.5.10.RELEASE'
     ext.grpc_version = '1.9.0'
+    ext.netty_handler_version = '4.1.17.Final'
+    ext.netty_tcnative_boringssl_static_version = '2.0.7.Final'
     ext.protobuf_plugin_version = '0.8.3'
     ext.protoc_version = '3.5.1-1'
     ext.commons_lang3_version = '3.7'
@@ -30,6 +32,14 @@ apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'com.google.protobuf'
+apply plugin: "com.google.osdetector"
+
+def tcnative_classifier = osdetector.classifier;
+// Fedora variants use a different soname for OpenSSL than other linux distributions
+// (see http://netty.io/wiki/forked-tomcat-native.html).
+if (osdetector.os == "linux" && osdetector.release.isLike("fedora")) {
+    tcnative_classifier += "-fedora";
+}
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
@@ -70,9 +80,13 @@ dependencies {
     compile "io.grpc:grpc-netty:${grpc_version}"
     compile "io.grpc:grpc-protobuf:${grpc_version}"
     compile "io.grpc:grpc-stub:${grpc_version}"
+    compile group: 'io.netty', name: 'netty-handler', version: "${netty_handler_version}", force: true
+    compile "io.netty:netty-tcnative-boringssl-static:${netty_tcnative_boringssl_static_version}"
+//    compile 'io.netty:netty-tcnative:2.0.7.Final:windows-x86_64'// + tcnative_classifier
 
     // zk client curator
     compile "org.apache.curator:curator-recipes:${zk_curator_version}"
+
 }
 
 //compileKotlin {
@@ -117,3 +131,4 @@ if (project.hasProperty('method')) {
 } else {
     apply from: "agent.gradle"
 }
+

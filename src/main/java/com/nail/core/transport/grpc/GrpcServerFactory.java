@@ -9,10 +9,8 @@ import com.nail.core.transport.ITransServerFactory;
  */
 public class GrpcServerFactory implements ITransServerFactory {
 
-    private RemoteManager remoteManager;
-
     @Override
-    public ITransServer buildTransServer() {
+    public ITransServer buildTransServer(RemoteManager remoteManager) {
         return new GrpcTransServer(remoteManager);
     }
 }

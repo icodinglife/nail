@@ -14,6 +14,7 @@ public class GrpcClientFactory implements ITransClientFactory {
     public ITransClient buildTransClient(String host, int port, Executor executor) {
         Channel channel = NettyChannelBuilder
                 .forAddress(host, port)
+                .usePlaintext(true)
                 .eventLoopGroup((EventLoopGroup) executor)
                 .build();
         TransGrpc.TransFutureStub stub = TransGrpc.newFutureStub(channel);

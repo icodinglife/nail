@@ -54,7 +54,7 @@ public class NailContext {
     }
 
     public String getName() {
-        return null;
+        return config.getName();
     }
 
     public void addActorRef(String group, String name, ActorRef<Object> ref) {

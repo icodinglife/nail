@@ -2,6 +2,7 @@ package com.nail.core.transport;
 
 import com.nail.core.NailConfig;
 import com.nail.core.NailContext;
+import com.nail.core.RemoteManager;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,17 +18,19 @@ public class TransManager {
 
     private NailContext nailContext;
     private NailConfig nailConfig;
+    private RemoteManager remoteManager;
 
     private ITransServerFactory transServerFactory;
     private ITransClientFactory transClientFactory;
 
     private ITransServer transServer;
 
-    public void init(ITransClientFactory factory, ITransServerFactory transServerFactory, NailContext nailContext, NailConfig config) {
+    public void init(ITransClientFactory factory, ITransServerFactory transServerFactory, NailContext nailContext, NailConfig config, RemoteManager remoteManager) {
         this.transClientFactory = factory;
         this.transServerFactory = transServerFactory;
         this.nailContext = nailContext;
         this.nailConfig = config;
+        this.remoteManager = remoteManager;
 
         clientMap = new ConcurrentHashMap<>();
 
@@ -35,7 +38,7 @@ public class TransManager {
     }
 
     private void startSelfNode() {
-        transServer = transServerFactory.buildTransServer();
+        transServer = transServerFactory.buildTransServer(remoteManager);
         try {
             transServer.start(nailConfig.getPort());
         } catch (IOException e) {

@@ -1,5 +1,8 @@
 package com.nail.core;
 
+import co.paralleluniverse.fibers.Fiber;
+import co.paralleluniverse.fibers.FiberUtil;
+import co.paralleluniverse.strands.SuspendableCallable;
 import com.nail.core.loadbalance.LoadbalanceManager;
 import com.nail.core.registry.Registry;
 import com.nail.core.registry.ServiceDiscovery;
@@ -9,6 +12,8 @@ import com.nail.core.transport.ITransServerFactory;
 import com.nail.core.transport.TransManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by guofeng.qin on 2018/02/24.
@@ -32,16 +37,16 @@ public class NailApp {
         this.nailConfig = nailConfig;
         this.serverFactory = serverFactory;
         this.clientFactory = clientFactory;
-
-        init();
     }
 
-    private void init() {
+    public <V> V init(SuspendableCallable<V> run) throws ExecutionException, InterruptedException {
         nailContext = new NailContext();
         nailContext.init(nailConfig);
 
         transManager = new TransManager();
-        transManager.init(clientFactory, serverFactory, nailContext, nailConfig);
+        remoteManager = new RemoteManager();
+
+        transManager.init(clientFactory, serverFactory, nailContext, nailConfig, remoteManager);
 
         registry = new ZKRegistry();
         registry.init(nailConfig.getZKHosts());
@@ -55,8 +60,9 @@ public class NailApp {
         serviceManager = new ServiceManager();
         serviceManager.init(nailContext, nailConfig, serviceDiscovery);
 
-        remoteManager = new RemoteManager();
         remoteManager.init(nailContext, serviceDiscovery, loadbalanceManager, transManager, serviceManager);
+
+        return FiberUtil.runInFiber(nailContext.getFiberScheduler(), run);
     }
 
     public NailConfig getNailConfig() {
