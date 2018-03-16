@@ -52,7 +52,7 @@ public class NailApp {
         registry.init(nailConfig.getZKHosts());
 
         serviceDiscovery = new ServiceDiscovery();
-        serviceDiscovery.init(registry, nailConfig.getZone(), nailConfig.getName(), nailConfig.getHost(), nailConfig.getPort());
+        serviceDiscovery.init(registry, transManager, nailConfig.getZone(), nailConfig.getName(), nailConfig.getHost(), nailConfig.getPort());
 
         loadbalanceManager = new LoadbalanceManager();
         loadbalanceManager.init();

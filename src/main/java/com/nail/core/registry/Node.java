@@ -40,4 +40,24 @@ public class Node {
     public void setPort(int port) {
         this.port = port;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj instanceof Node) {
+            Node objNode = (Node) obj;
+            String objName = objNode.getName();
+            String objHost = objNode.getHost();
+            int objPort = objNode.getPort();
+
+            return name.equals(objName)
+                    && host.equals(objHost)
+                    && port == objPort;
+        }
+
+        return false;
+    }
 }

@@ -2,6 +2,7 @@ package com.nail.core.registry;
 
 import com.alibaba.fastjson.JSON;
 import com.nail.core.NailContext;
+import com.nail.core.transport.TransManager;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,12 +23,14 @@ public class ServiceDiscovery {
     private DiscoveryListener serviceListener;
 
     private Registry registry;
+    private TransManager transManager;
 
     public ServiceDiscovery() {
     }
 
-    public void init(Registry registry, String zone, String nodeName, String host, int port) {
+    public void init(Registry registry, TransManager transManager, String zone, String nodeName, String host, int port) {
         this.registry = registry;
+        this.transManager = transManager;
         this.nodeListener = new NodeListener(this);
         this.serviceListener = new ServiceListener(this);
 
@@ -68,14 +71,27 @@ public class ServiceDiscovery {
     private boolean addNode(String nodeName, Node node) {
         if (nodeMap.containsKey(nodeName)) {
             logger.error(nodeName + " Node Already Exist.");
-            return false;
+            return updateNode(nodeName, node);
         }
         nodeMap.put(nodeName, node);
         return true;
     }
 
+    private boolean updateNode(String nodeName, Node node) {
+        Node oldNode = nodeMap.get(nodeName);
+        if (oldNode.equals(node)) {
+            return true;
+        }
+        transManager.removeTransClient(oldNode.getHost(), oldNode.getPort());
+        nodeMap.put(nodeName, node);
+        return true;
+    }
+
     private void removeNode(String nodeName) {
-        nodeMap.remove(nodeName);
+        Node node = nodeMap.remove(nodeName);
+        if (node != null) {
+            transManager.removeTransClient(node.getHost(), node.getPort());
+        }
     }
 
     private boolean addService(String groupName, String serviceName, Service service) {

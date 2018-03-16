@@ -207,7 +207,7 @@ public class App {
         registry.init(zkHosts);
 
         ServiceDiscovery serviceDiscovery = new ServiceDiscovery();
-        serviceDiscovery.init(registry, zone, nodeName, host, port);
+        serviceDiscovery.init(registry, null, zone, nodeName, host, port);
 
         Service service = new Service("TestService", "TestService1", nodeName);
         serviceDiscovery.registerService(zone, service);
